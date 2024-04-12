@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace CrimeData.Api.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
+    [Route("api/v{version:apiVersion}/[controller]")]
     public class WeatherForecastController : ControllerBase
     {
         private static readonly string[] Summaries = new[]
