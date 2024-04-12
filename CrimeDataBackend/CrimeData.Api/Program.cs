@@ -1,4 +1,5 @@
 using CrimeData.Data;
+using CrimeData.Services.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Versioning;
 using Microsoft.EntityFrameworkCore;
@@ -30,7 +31,19 @@ options.UseSqlServer(databaseConnection, b=>b.MigrationsAssembly("CrimeData.Api"
 
 
 builder.Services.AddScoped<IDbContext, CrimeDataContext>();
-//builder.Services.AddScoped<IProductService, ProductService>();
+
+builder.Services.AddScoped<ICrimeService, CrimeService>();
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowOrigin",
+         builder =>
+         {
+             builder.AllowAnyOrigin()
+                    .AllowAnyMethod()
+                    .AllowAnyHeader();
+         });
+});
 builder.Services.AddScoped(typeof(IRepository<>), typeof(EfRepository<>));
 builder.Services.AddScoped(typeof(IAsyncRepository<>), typeof(EfRepository<>));
 // Configure the HTTP request pipeline.
@@ -46,7 +59,6 @@ app.UseHttpsRedirection();
 app.UseAuthorization();
 
 app.MapControllers();
-
 
 
 app.Run();
