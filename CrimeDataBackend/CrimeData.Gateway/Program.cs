@@ -1,51 +1,32 @@
 using Ocelot.DependencyInjection;
 using Ocelot.Middleware;
 
-var builder = WebApplication.CreateBuilder(args);
-
-// Add services to the container.
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-builder.Services.AddOcelot();
-
-
-var app = builder.Build();
-
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
-
-app.UseHttpsRedirection();
-
-app.UseOcelot().Wait();
-
-var summaries = new[]
-{
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
-
-app.MapGet("/weatherforecast", () =>
-{
-    var forecast =  Enumerable.Range(1, 5).Select(index =>
-        new WeatherForecast
-        (
-            DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-            Random.Shared.Next(-20, 55),
-            summaries[Random.Shared.Next(summaries.Length)]
-        ))
-        .ToArray();
-    return forecast;
-})
-.WithName("GetWeatherForecast")
-.WithOpenApi();
-
-app.Run();
-
-record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
-{
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
-}
+new WebHostBuilder()
+          .UseKestrel()
+          .UseContentRoot(Directory.GetCurrentDirectory())
+          .ConfigureAppConfiguration((hostingContext, config) =>
+          {
+              config
+                  .SetBasePath(hostingContext.HostingEnvironment.ContentRootPath)
+                  .AddJsonFile("appsettings.json", true, true)
+                  .AddJsonFile($"appsettings.{hostingContext.HostingEnvironment.EnvironmentName}.json", true, true)
+                  .AddJsonFile("ocelot.json")
+                  .AddEnvironmentVariables();
+          })
+          .ConfigureServices(s =>
+          {
+              s.AddOcelot();
+          })
+          .ConfigureLogging((hostingContext, logging) =>
+          {
+              logging.ClearProviders();
+              logging.SetMinimumLevel(LogLevel.Information);
+              logging.AddConsole(); // MS Console for Development and/or Testing environments only
+          })
+          .UseIISIntegration()
+          .Configure(app =>
+          {
+              app.UseOcelot().Wait();
+          })
+          .Build()
+          .Run();
