@@ -12,7 +12,7 @@ namespace CrimeData.Data
     public class CrimeDataContext : DbContext, IDbContext
     {
 
-
+        public CrimeDataContext() { }
         public CrimeDataContext(DbContextOptions<CrimeDataContext> options) : base(options)
         {
              this.ChangeTracker.LazyLoadingEnabled = true; 
