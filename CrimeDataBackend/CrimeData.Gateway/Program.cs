@@ -1,9 +1,6 @@
 using Ocelot.DependencyInjection;
 using Ocelot.Middleware;
 
-var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
-
-
 new WebHostBuilder()
           .UseKestrel()
           .UseContentRoot(Directory.GetCurrentDirectory())

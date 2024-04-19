@@ -4,6 +4,7 @@ using CrimeData.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CrimeData.Api.Migrations
 {
     [DbContext(typeof(CrimeDataContext))]
-    partial class CrimeDataContextModelSnapshot : ModelSnapshot
+    [Migration("20240417085357_UpdateFks")]
+    partial class UpdateFks
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -100,9 +103,8 @@ namespace CrimeData.Api.Migrations
                     b.Property<double?>("Longtitde")
                         .HasColumnType("float");
 
-                    b.Property<string>("Offense")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int?>("OffenseId")
+                        .HasColumnType("int");
 
                     b.Property<DateTime>("OffenseStartDatetime")
                         .HasColumnType("datetime2");
@@ -124,6 +126,8 @@ namespace CrimeData.Api.Migrations
                     b.HasIndex("CityId");
 
                     b.HasIndex("CrimeAgainstCategoryId");
+
+                    b.HasIndex("OffenseId");
 
                     b.HasIndex("ParentGroupId");
 
@@ -155,7 +159,7 @@ namespace CrimeData.Api.Migrations
                     b.ToTable("CrimeAgainstCategory", (string)null);
                 });
 
-            modelBuilder.Entity("CrimeData.Entities.Tables.ParentGroup", b =>
+            modelBuilder.Entity("CrimeData.Entities.Tables.Offence", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -168,6 +172,31 @@ namespace CrimeData.Api.Migrations
 
                     b.Property<string>("Code")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CredatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ApiSourceId");
+
+                    b.ToTable("Offence", (string)null);
+                });
+
+            modelBuilder.Entity("CrimeData.Entities.Tables.ParentGroup", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("ApiSourceId")
+                        .HasColumnType("int");
 
                     b.Property<DateTime>("CredatedAt")
                         .HasColumnType("datetime2");
@@ -210,6 +239,10 @@ namespace CrimeData.Api.Migrations
                         .WithMany("Crimes")
                         .HasForeignKey("CrimeAgainstCategoryId");
 
+                    b.HasOne("CrimeData.Entities.Tables.Offence", "Offence")
+                        .WithMany("Crimes")
+                        .HasForeignKey("OffenseId");
+
                     b.HasOne("CrimeData.Entities.Tables.ParentGroup", "ParentGroup")
                         .WithMany("Crimes")
                         .HasForeignKey("ParentGroupId");
@@ -220,6 +253,8 @@ namespace CrimeData.Api.Migrations
 
                     b.Navigation("CrimeAgainstCategory");
 
+                    b.Navigation("Offence");
+
                     b.Navigation("ParentGroup");
                 });
 
@@ -227,6 +262,17 @@ namespace CrimeData.Api.Migrations
                 {
                     b.HasOne("CrimeData.Entities.Tables.ApiSource", "ApiSource")
                         .WithMany("CrimeAgainsCategories")
+                        .HasForeignKey("ApiSourceId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ApiSource");
+                });
+
+            modelBuilder.Entity("CrimeData.Entities.Tables.Offence", b =>
+                {
+                    b.HasOne("CrimeData.Entities.Tables.ApiSource", "ApiSource")
+                        .WithMany("Offences")
                         .HasForeignKey("ApiSourceId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -251,10 +297,17 @@ namespace CrimeData.Api.Migrations
 
                     b.Navigation("Crimes");
 
+                    b.Navigation("Offences");
+
                     b.Navigation("ParentGroups");
                 });
 
             modelBuilder.Entity("CrimeData.Entities.Tables.CrimeAgainstCategory", b =>
+                {
+                    b.Navigation("Crimes");
+                });
+
+            modelBuilder.Entity("CrimeData.Entities.Tables.Offence", b =>
                 {
                     b.Navigation("Crimes");
                 });

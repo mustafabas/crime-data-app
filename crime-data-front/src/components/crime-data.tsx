@@ -3,12 +3,14 @@
 import React, { useEffect, useState } from 'react';
 import { Container, CircularProgress, Typography } from '@mui/material';
 import CrimeChart from './crime-chart';
+import { FilterRequest } from '../constant/types';
+import { GET_CRIMES_URL } from '../constant/constant';
 
 interface CrimeDataProps {
-  apiUrl: string;
+  filter: FilterRequest;
 }
 
-const CrimeData: React.FC<CrimeDataProps> = ({ apiUrl }) => {
+const CrimeData: React.FC<CrimeDataProps> = ({ filter }) => {
   const [crimeData, setCrimeData] = useState<{ name: string; value: number }[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -22,14 +24,14 @@ const CrimeData: React.FC<CrimeDataProps> = ({ apiUrl }) => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch(apiUrl
+        const response = await fetch(GET_CRIMES_URL
         );
 
         if (!response.ok) {
           throw new Error('Failed to fetch data');
         }
         const data = await response.json();
-        console.log(data);
+  
         setCrimeData(data);
       } catch (error) {
         setError("Error Occured");
@@ -39,7 +41,7 @@ const CrimeData: React.FC<CrimeDataProps> = ({ apiUrl }) => {
     };
 
     fetchData();
-  }, [apiUrl]);
+  }, [filter]);
 
   if (loading) {
     return (

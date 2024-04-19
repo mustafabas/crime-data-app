@@ -23,17 +23,12 @@ namespace CrimeData.Data
             _dbContext = dbContext;
         }
 
-        public virtual T GetById(int id)
+        public virtual T? GetById(int id)
         {
             return _dbContext.Set<T>().Find(id);
         }
 
-        public T GetSingleBySpec(ISpecification<T> spec)
-        {
-            return List(spec).FirstOrDefault();
-        }
-
-        public virtual async Task<T> GetByIdAsync(int id)
+        public virtual async Task<T?> GetByIdAsync(int id)
         {
             return await _dbContext.Set<T>().FindAsync(id);
         }
@@ -47,25 +42,7 @@ namespace CrimeData.Data
         {
             return await _dbContext.Set<T>().ToListAsync();
         }
-
-        public IEnumerable<T> List(ISpecification<T> spec)
-        {
-            return ApplySpecification(spec).AsEnumerable();
-        }
-        public async Task<IReadOnlyList<T>> ListAsync(ISpecification<T> spec)
-        {
-            return await ApplySpecification(spec).ToListAsync();
-        }
         
-        public int Count(ISpecification<T> spec)
-        {
-            return ApplySpecification(spec).Count();
-        }
-        
-        public async Task<int> CountAsync(ISpecification<T> spec)
-        {
-            return await ApplySpecification(spec).CountAsync();
-        }
 
         public T Insert(T entity)
         {
@@ -83,8 +60,16 @@ namespace CrimeData.Data
             return entity;
         }
 
+        public async Task<List<T>> AddRangeAsync(List<T> entities)
+        {
+            _dbContext.Set<T>().AddRange(entities);
+            await _dbContext.SaveChangesAsync();
 
-        
+            return entities;
+        }
+
+
+
 
         public void Update(T entity)
         {
@@ -109,10 +94,14 @@ namespace CrimeData.Data
             _dbContext.Set<T>().Remove(entity);
             await _dbContext.SaveChangesAsync();
         }
-        
-        private IQueryable<T> ApplySpecification(ISpecification<T> spec)
+
+        public virtual IQueryable<T> Table
         {
-            return SpecificationEvaluator<T>.GetQuery(_dbContext.Set<T>().AsQueryable(), spec);
-        }        
+            get
+            {
+                return _dbContext.Set<T>();
+            }
+        }
+   
     }
 }

@@ -17,7 +17,8 @@
         "Type": "RoundRobin"
       },
       "UpstreamPathTemplate": "/{everything}",
-      "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete" ]
+      "UpstreamHttpMethod": [ "Get", "Post", "Put",
+                              "Delete" ]
     }
   ],
   "GlobalConfiguration": {
